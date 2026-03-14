@@ -1,0 +1,102 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://trustsignal.dev/schemas/ceid-schema.json",
+  "title": "Compliance Evidence Integrity Dataset Record",
+  "description": "Schema for synthetic records used to study integrity failures in automated compliance evidence pipelines.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "scenario_id",
+    "evidence_type",
+    "source_system",
+    "provenance_metadata",
+    "integrity_signal",
+    "anomaly_category",
+    "detection_context",
+    "reproduction_steps",
+    "simulated",
+    "contains_pii",
+    "notes"
+  ],
+  "properties": {
+    "scenario_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Stable identifier for the synthetic scenario."
+    },
+    "evidence_type": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Type of compliance evidence represented by the record."
+    },
+    "source_system": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Named source system used in the simulation."
+    },
+    "provenance_metadata": {
+      "type": "object",
+      "additionalProperties": {
+        "type": [
+          "string",
+          "number",
+          "boolean",
+          "null"
+        ]
+      },
+      "description": "Synthetic metadata describing source identifiers, transforms, or chain-of-custody context."
+    },
+    "integrity_signal": {
+      "type": "string",
+      "enum": [
+        "valid",
+        "warning",
+        "mismatch",
+        "missing",
+        "unverifiable"
+      ],
+      "description": "High-level integrity state expected for the record."
+    },
+    "anomaly_category": {
+      "type": "string",
+      "enum": [
+        "none",
+        "evidence_tampering",
+        "unauthorized_evidence_generation",
+        "timestamp_manipulation",
+        "pipeline_injection",
+        "evidence_reuse",
+        "provenance_erosion"
+      ],
+      "description": "Primary anomaly label for the synthetic record."
+    },
+    "detection_context": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Short description of why the scenario should be reviewed."
+    },
+    "reproduction_steps": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "description": "Human-readable steps describing how the synthetic anomaly was created."
+    },
+    "simulated": {
+      "type": "boolean",
+      "const": true,
+      "description": "Indicates that the record is synthetic and not derived from real evidence."
+    },
+    "contains_pii": {
+      "type": "boolean",
+      "const": false,
+      "description": "Indicates that the record does not contain personal data."
+    },
+    "notes": {
+      "type": "string",
+      "description": "Additional constraints, caveats, or reviewer notes."
+    }
+  }
+}
