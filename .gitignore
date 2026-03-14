@@ -30,5 +30,6 @@ out/
 
 # Generated artifacts
 *.pdf
+!output/pdf/trustagents-grant-application.pdf
 *.tmp
 *.swp
