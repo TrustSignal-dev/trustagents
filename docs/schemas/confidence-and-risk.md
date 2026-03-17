@@ -1,0 +1,38 @@
+# Confidence And Risk
+
+Confidence enum:
+
+- HIGH
+- MEDIUM
+- LOW
+
+Status enum:
+
+- VALID
+- INVALID
+- REVOKED
+- EXPIRED
+- CONFLICTED
+- UNVERIFIABLE
+- SOURCE_UNAVAILABLE
+- INSUFFICIENT_EVIDENCE
+
+Retrieval status enum:
+
+- SUCCESS
+- NO_MATCH
+- TIMEOUT
+- UNAVAILABLE
+- INCOMPLETE
+- ERROR
+
+Conservative precedence used by adjudication:
+
+1. REVOKED
+2. CONFLICTED
+3. SOURCE_UNAVAILABLE
+4. UNVERIFIABLE
+5. INSUFFICIENT_EVIDENCE
+6. EXPIRED
+7. INVALID
+8. VALID

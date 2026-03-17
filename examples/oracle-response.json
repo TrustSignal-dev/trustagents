@@ -1,0 +1,35 @@
+{
+  "schemaVersion": "1.0",
+  "oracleStatus": "VALID",
+  "confidence": "HIGH",
+  "confidenceScore": 0.9,
+  "checkedAt": "2026-01-01T00:00:00Z",
+  "artifactFingerprint": "d81f3d42f4f50f1f9f3346f06f998f7bc6fe0eb6c6f51c3594c585abf3d4d1bd",
+  "sourceResults": [
+    {
+      "sourceId": "mock-registry",
+      "sourceType": "mock_registry",
+      "queryPerformed": {
+        "identifier": "ID-12345"
+      },
+      "retrievalStatus": "SUCCESS",
+      "matchedFields": {
+        "identifier": "ID-12345"
+      },
+      "conflictingFields": {},
+      "sourceFreshness": "fresh",
+      "sourceErrors": []
+    }
+  ],
+  "comparisonResults": [],
+  "policyResults": [],
+  "riskFlags": [],
+  "explanations": [
+    "All required checks passed conservatively"
+  ],
+  "auditTrace": [
+    "request_intake",
+    "source_retrieval",
+    "adjudication"
+  ]
+}

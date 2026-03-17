@@ -1,0 +1,10 @@
+[
+  {
+    "fullName": "Alex Carter",
+    "dateOfBirth": "1990-01-05",
+    "identifier": "ID-12345",
+    "artifactHash": "abc123",
+    "revoked": false,
+    "expired": false
+  }
+]
