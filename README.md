@@ -1,53 +1,27 @@
 # TrustAgents
 
-TrustAgents is a defensive-security research repository for simulated fraud detection in compliance evidence pipelines. It is designed to support a grant application and early research review with concrete artifacts instead of product infrastructure. The repository focuses on integrity failures such as evidence tampering, unauthorized evidence generation, timestamp manipulation, pipeline injection, and evidence reuse. All examples in this repository are synthetic or simulated and do not contain customer data or personally identifiable information.
+TrustAgents is a defensive-security research repository for simulated fraud detection in compliance evidence pipelines. It supports proposal review with synthetic artifacts and explicit limits. TrustSignal production controls remain unchanged: artifact hashing, signed receipt issuance, receipt verification, scoped auth, webhook integrity checks, and redaction or partner-gated surfaces are not replaced by this repository.
 
-## Project Scope
+## TrustAgents R&D Boundary
 
-This repository documents a proposed research project: Autonomous Agents for Fraud Detection in Compliance Infrastructure.
+The `trustagents` oracle service in `src/trustagents/` is:
 
-The project is framed as:
+- experimental
+- optional
+- non-blocking
+- isolated from the production verification dependency chain
 
-- a research scaffold for defensive integrity monitoring
-- a synthetic dataset and schema effort
-- a simulation and evaluation plan
-- a public-benefit release package intended for external review
+Oracle output is advisory and ingestion-ready only. Current repository content does **not** claim production dependency on oracle fusion, chain anchoring, ZKP attestation, or autonomous research agents. Any future integration is gated and documented as future work.
 
-It is not:
-
-- a production detection system
-- a hosted SaaS application
-- a repository of real audit artifacts
-- evidence that the proposed methods already outperform existing controls
-
-## Outputs
-
-This repository is intended to publish:
-
-- proposal and grant application source documents
-- the Compliance Evidence Integrity Dataset schema
-- synthetic anomaly samples
-- simulation and methodology notes
-- agent role definitions
-- evaluation benchmarks and metrics
+All fixtures and examples are synthetic unless explicitly documented otherwise.
 
 ## Repository Map
 
 - `proposal/`: grant-ready summaries, application text, budget, and timeline
-- `docs/`: problem framing, methodology, release plan, and threat model
-- `datasets/`: schema and synthetic sample anomalies
+- `docs/`: architecture boundaries, schema contracts, methodology, and threat model
+- `datasets/`: synthetic schema and sample anomalies
 - `simulations/`: scenario catalog and pipeline model
-- `agents/`: lightweight role definitions for research agents
+- `agents/`: role definitions for research agents
 - `eval/`: benchmark design and metrics
-
-## Defensive Framing
-
-The repository is limited to defensive integrity failures in automated compliance workflows. It does not include offensive testing procedures, exploit development, or operational guidance for bypassing controls. Fraud scenarios are documented only at a level needed to define synthetic data and evaluation tasks.
-
-## Roadmap
-
-1. Publish the initial proposal and dataset schema.
-2. Expand the synthetic anomaly corpus and scenario coverage.
-3. Formalize benchmark tasks and evaluator instructions.
-4. Refine labeling guidance, threat boundaries, and reviewer documentation.
-5. Release benchmark materials with clear limitations and no overclaiming.
+- `src/trustagents/`: isolated experimental oracle evaluation service
+- `tests/`: unit, integration, and regression checks for the oracle service

@@ -1,0 +1,12 @@
+{
+  "tenantId": "tenant-sim-001",
+  "claimPackage": {
+    "fullName": "Alex Carter",
+    "dateOfBirth": "1990-01-05",
+    "identifier": "ID-12345",
+    "artifactHash": "abc123"
+  },
+  "policyProfile": "conservative",
+  "idempotencyKey": "sample-key-001",
+  "preferAsync": false
+}
