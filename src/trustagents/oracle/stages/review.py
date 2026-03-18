@@ -26,7 +26,10 @@ def route_review(
     if "identity_ambiguity" in risk_flags or "near_match_signal" in risk_flags:
         reasons.append("Ambiguity or near-match evidence present")
         needs_manual = True
-    if not source_results_complete or "compliance_gap" in risk_flags:
+    if "compliance_gap" in risk_flags:
+        reasons.append("Compliance gap: no registry source returned a successful result")
+        needs_manual = True
+    elif not source_results_complete:
         reasons.append("Registry coverage incomplete")
         needs_manual = True
     if extraction_confidence < 0.7:
