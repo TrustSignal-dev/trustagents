@@ -5,8 +5,16 @@ from fastapi import APIRouter, Depends, Header, HTTPException, Response
 from trustagents.auth.helpers import idempotency_store, tenant_guard
 from trustagents.config.settings import settings
 from trustagents.jobs.store import job_store
-from trustagents.oracle.models import JobCreateResponse, JobResponse, OracleRequest
+from trustagents.learning.case_memory import case_memory_store
+from trustagents.oracle.models import (
+    JobCreateResponse,
+    JobResponse,
+    OracleRequest,
+    ReviewedCaseInput,
+    ReviewerFeedbackInput,
+)
 from trustagents.oracle.service import oracle_service
+from trustagents.review.store import review_queue_store
 
 router = APIRouter()
 
@@ -66,3 +74,22 @@ async def get_job(job_id: str, _: str = Depends(tenant_guard)):
     if not job:
         raise HTTPException(status_code=404, detail="Job not found")
     return job
+
+
+@router.get("/api/v1/oracle/review-queue")
+async def list_review_queue(_: str = Depends(tenant_guard)):
+    return {"items": review_queue_store.list_items()}
+
+
+@router.post("/api/v1/oracle/review-cases")
+async def record_review_case(payload: ReviewedCaseInput, _: str = Depends(tenant_guard)):
+    case = case_memory_store.add_case(payload)
+    return case.model_dump(by_alias=True, mode="json")
+
+
+@router.post("/api/v1/oracle/review-feedback")
+async def record_feedback(payload: ReviewerFeedbackInput, _: str = Depends(tenant_guard)):
+    case = case_memory_store.apply_feedback(payload)
+    if not case:
+        raise HTTPException(status_code=404, detail="Case not found")
+    return case.model_dump(by_alias=True, mode="json")
