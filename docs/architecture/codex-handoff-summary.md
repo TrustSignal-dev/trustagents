@@ -18,7 +18,7 @@ compact FastAPI service (~1,100 lines of Python) backed by synthetic data.
 | Policy evaluation | Complete | 10 policy outcomes with hard-block precedence |
 | Adjudication | Complete | Cascading status resolution |
 | Review routing | Complete | Condition-based manual review triggers |
-| Receipt generation | Partial | SHA-256 based, no verification or revocation |
+| Receipt generation | Complete | SHA-256 based, verification and revocation added |
 | Anchoring | Partial | Local deterministic, no external anchor network |
 | Case memory (shadow learning) | Complete | Jaccard similarity, feedback capture |
 | Review queue | Complete | In-memory, enqueue/list |
@@ -32,17 +32,17 @@ compact FastAPI service (~1,100 lines of Python) backed by synthetic data.
 
 Codex explicitly documented these as future work in `trustsignal-flow-refactor-plan.md`:
 
-1. **Receipt verification API** — no endpoint to verify a previously issued receipt
-2. **Receipt revocation lifecycle** — no revocation or status lookup
+1. ~~**Receipt verification API**~~ — **Done**: `POST /api/v1/oracle/receipts/verify`
+2. ~~**Receipt revocation lifecycle**~~ — **Done**: `POST /api/v1/oracle/receipts/revoke`, `GET /api/v1/oracle/receipts/{id}`, in-memory `ReceiptStore`
 3. **Durable storage** — all stores are in-memory (jobs, review queue, case memory, idempotency)
-4. **Structured logging** — no logging instrumentation
+4. ~~**Structured logging**~~ — **Done**: `get_logger` / `log_stage` throughout all pipeline stages
 5. **Metrics and tracing** — no observability hooks
-6. **Error response schema** — errors returned as unstructured HTTP exceptions
+6. ~~**Error response schema**~~ — **Done**: `OracleError` with machine-readable codes, pre-defined error constants
 7. **Retry and resilience** — HTTP connector has no retry logic
 8. **Multi-source registry configuration** — hardcoded to mock_registry
 9. **Signed key management** — receipt signatures use plain SHA-256
 10. **CI/CD pipeline** — no workflow configuration
-11. **Compliance-gap handling** — incomplete coverage not flagged as a distinct risk
+11. ~~**Compliance-gap handling**~~ — **Done**: `compliance_gap` risk flag now emits a distinct reason in review routing
 12. **External anchor integration** — stub only
 
 ### Codex's Intended Direction

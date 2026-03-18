@@ -4,7 +4,8 @@ from __future__ import annotations
 import logging
 
 from trustagents.observability import get_logger, log_stage
-from trustagents.oracle.models import RetrievalStatus, SourceResult
+from trustagents.oracle.models import FraudRiskBand, RetrievalStatus, SourceResult
+from trustagents.oracle.stages.review import route_review
 from trustagents.risk.core import generate_risk_flags
 
 
@@ -58,3 +59,33 @@ def test_no_compliance_gap_flag_when_source_succeeds():
     ]
     flags = generate_risk_flags([], sources)
     assert "compliance_gap" not in flags
+
+
+def test_route_review_compliance_gap_reason_is_distinct():
+    """compliance_gap risk flag must produce a distinct reason, not the generic coverage message."""
+    _, _, needs_manual, reasons = route_review(
+        band=FraudRiskBand.LOW,
+        risk_flags=["compliance_gap"],
+        policy_results=[],
+        extraction_confidence=1.0,
+        source_results_complete=False,
+        conflicting_sources=False,
+    )
+    assert needs_manual is True
+    assert any("Compliance gap" in r for r in reasons)
+    assert not any(r == "Registry coverage incomplete" for r in reasons)
+
+
+def test_route_review_incomplete_coverage_reason_without_compliance_gap():
+    """Incomplete source coverage without the compliance_gap flag uses the generic message."""
+    _, _, needs_manual, reasons = route_review(
+        band=FraudRiskBand.LOW,
+        risk_flags=[],
+        policy_results=[],
+        extraction_confidence=1.0,
+        source_results_complete=False,
+        conflicting_sources=False,
+    )
+    assert needs_manual is True
+    assert any(r == "Registry coverage incomplete" for r in reasons)
+    assert not any("Compliance gap" in r for r in reasons)
