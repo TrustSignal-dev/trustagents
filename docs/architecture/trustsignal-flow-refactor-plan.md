@@ -70,6 +70,6 @@ Hard blocks stay rule-based for:
 
 - durable storage for review queue and case memory
 - explicit registry adapter configuration and multi-source sanctions feeds
-- separate receipt verification API and revocation lifecycle API
+- ~~separate receipt verification API and revocation lifecycle API~~ (added)
 - signed key management and external anchor network integration
 - offline retraining/reweighting workflow with formal approval gates

@@ -11,6 +11,7 @@ pnpm-debug.log*
 # Python
 __pycache__/
 *.pyc
+*.egg-info/
 
 # Environment and secrets
 .env

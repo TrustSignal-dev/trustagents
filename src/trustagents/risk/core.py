@@ -13,4 +13,6 @@ def generate_risk_flags(comparisons: list[ComparisonResult], sources: list[Sourc
         flags.append("source_outage")
     if any(s.source_freshness == "stale" for s in sources):
         flags.append("stale_source_data")
+    if not any(s.retrieval_status == "SUCCESS" for s in sources):
+        flags.append("compliance_gap")
     return flags

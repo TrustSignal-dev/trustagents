@@ -18,6 +18,7 @@ _SIGNAL_WEIGHTS = {
     "high_mismatch": 0.35,
     "near_match_signal": 0.2,
     "low_extraction_confidence": 0.2,
+    "compliance_gap": 0.30,
 }
 
 

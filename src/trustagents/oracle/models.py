@@ -212,3 +212,39 @@ class ReviewerFeedbackInput(CamelModel):
     reviewer_disposition: str
     false_positive: bool = False
     false_negative: bool = False
+
+
+class ReceiptVerifyRequest(CamelModel):
+    receipt_id: str
+    fingerprint: str
+    signature: str
+
+
+class ReceiptVerifyResponse(CamelModel):
+    valid: bool
+    reason: str
+    state: str | None = None
+    revoked_at: str | None = None
+
+
+class ReceiptRevokeRequest(CamelModel):
+    receipt_id: str
+    reason: str
+
+
+class ReceiptRevokeResponse(CamelModel):
+    receipt_id: str
+    state: str
+    revoked_at: str
+    reason: str
+
+
+class ReceiptStatusResponse(CamelModel):
+    receipt_id: str
+    state: str
+    tenant_id: str
+    decision: str
+    fingerprint: str
+    issued_at: str
+    revoked_at: str | None = None
+    revocation_reason: str | None = None
