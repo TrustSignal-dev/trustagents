@@ -1,10 +1,11 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, Header, Response
+from fastapi import APIRouter, Depends, Header, HTTPException, Request, Response
 
 from trustagents.api.errors import (
     ASYNC_JOBS_DISABLED,
     CASE_NOT_FOUND,
+    GITHUB_APP_DISABLED,
     JOB_NOT_FOUND,
     ORACLE_API_DISABLED,
     RECEIPT_ALREADY_REVOKED,
@@ -13,8 +14,10 @@ from trustagents.api.errors import (
 )
 from trustagents.auth.helpers import idempotency_store, tenant_guard
 from trustagents.config.settings import settings
+from trustagents.github_app.webhook import verify_webhook_request
 from trustagents.jobs.store import job_store
 from trustagents.learning.case_memory import case_memory_store
+from trustagents.observability import get_logger, log_stage
 from trustagents.oracle.models import (
     JobCreateResponse,
     JobResponse,
@@ -32,6 +35,8 @@ from trustagents.receipts.store import ReceiptState, receipt_store
 from trustagents.review.store import review_queue_store
 
 router = APIRouter()
+
+_webhook_logger = get_logger("api.webhook")
 
 
 @router.get("/healthz")
@@ -150,3 +155,45 @@ async def get_receipt(receipt_id: str, _: str = Depends(tenant_guard)):
         revoked_at=record.revoked_at.isoformat() if record.revoked_at else None,
         revocation_reason=record.revocation_reason,
     )
+
+
+# --- GitHub App webhook ingress ---
+
+
+@router.post("/api/v1/github/webhook")
+async def github_webhook(request: Request) -> dict:
+    """GitHub App webhook ingress endpoint.
+
+    Security pipeline (in order):
+    1. Feature-flag gate — returns 404 if disabled.
+    2. Body-size enforcement (10 KB limit).
+    3. HMAC-SHA256 signature verification (timing-safe).
+    4. Delivery-ID replay protection.
+    5. Pydantic schema validation.
+    6. Business-logic dispatch.
+
+    Returns 200 with an ``accepted`` envelope on success.
+    Returns 4xx/5xx with a structured error body on any failure.
+    """
+    if not settings.feature_flags.github_app_webhook_enabled:
+        GITHUB_APP_DISABLED.raise_http()
+
+    with log_stage(_webhook_logger, "github_webhook_ingress"):
+        event_type, delivery_id, payload, raw = await verify_webhook_request(request)
+
+    _webhook_logger.info(
+        "webhook_dispatched",
+        extra={
+            "event": event_type,
+            "delivery_id": delivery_id,
+            "action": payload.action,
+            "installation_id": payload.installation.id if payload.installation else None,
+        },
+    )
+
+    return {
+        "accepted": True,
+        "delivery_id": delivery_id,
+        "event": event_type,
+        "action": payload.action,
+    }
