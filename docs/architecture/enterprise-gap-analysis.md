@@ -58,18 +58,42 @@ source coverage. HTTP connector retry logic remains open.
 **Impact:** Acceptable for simulation. Must be addressed before any durable
 deployment, but pluggable interfaces make this a clean migration when ready.
 
-### 6. Security Hardening — Medium
+### 6. Security Hardening — Partially Resolved
 
-| Gap | Description |
-|---|---|
-| SHA-256 receipt signatures | Receipts use plain SHA-256 hashing rather than HMAC or asymmetric signatures. Acceptable for simulation but not for production trust assertions. |
-| No rate limiting | API has no request rate controls. |
-| No input size limits | Request payloads have no explicit size bounds. |
+| Gap | Description | Status |
+|---|---|---|
+| SHA-256 receipt signatures | Receipts use plain SHA-256 hashing rather than HMAC or asymmetric signatures. Acceptable for simulation but not for production trust assertions. | Open |
+| No rate limiting | API has no request rate controls. | Open |
+| No input size limits | Request payloads have no explicit size bounds. | **Resolved** — 10 KB body limit enforced on the GitHub App webhook endpoint. |
+| No webhook HMAC verification | GitHub App webhook payloads were not verified. | **Resolved** — `x-hub-signature-256` verified with `hmac.compare_digest` before any business logic. |
+| No replay protection on webhook delivery | Duplicate GitHub deliveries could be processed multiple times. | **Resolved** — delivery-ID deduplication via `InMemoryReplayStore` with TTL eviction. |
+| No webhook payload schema validation | Raw JSON payloads were not validated against a schema. | **Resolved** — Pydantic `WebhookPayload` model validates all ingress payloads. |
 
-**Impact:** Adequate for simulation scope. Must be hardened before production
-deployment.
+**Impact:** Webhook ingress is now fail-closed: signature must verify, delivery must be
+novel, and payload must pass schema checks before any downstream work is triggered.
+Receipt signature hardening and rate limiting remain open.
 
-### 7. CI/CD — Low (for simulation scope)
+### 7. GitHub App Orchestration — Resolved
+
+| Area | Description | Status |
+|---|---|---|
+| Webhook ingress hardening | HMAC verification, timing-safe comparison, body-size enforcement, replay protection, schema validation. | **Resolved** — `src/trustagents/github_app/webhook.py` |
+| Replay / deduplication store | Delivery-ID deduplication with TTL eviction, swap-able backend interface. | **Resolved** — `src/trustagents/github_app/replay_store.py` |
+| Check-run publishing | Idempotent check-run publish stub with structured logging, external_id keying. | **Resolved** — `src/trustagents/github_app/check_run.py` |
+| Installation token lifecycle | Least-privilege token acquisition stub; tokens not cached, discarded after use. | **Resolved** — `src/trustagents/github_app/token.py` |
+| Integration tests | Valid webhook, invalid signature, replayed delivery, malformed payload, missing header, oversized body, feature-flag gate. | **Resolved** — `tests/integration/test_github_webhook.py` (15 tests) |
+
+**Trust boundary:** The webhook endpoint is gated behind `github_app_webhook_enabled`
+feature flag (default off). Real GitHub API token exchange requires
+`GITHUB_APP_ID` and `GITHUB_APP_PRIVATE_KEY` environment variables; absent these,
+the system operates in simulation mode only.
+
+**Restart-safety note:** The in-process `InMemoryReplayStore` does not survive
+process restarts. For strict replay guarantees across restarts, replace the module
+singleton with a Redis- or DB-backed implementation conforming to the `ReplayStore`
+protocol in `replay_store.py`.
+
+### 8. CI/CD — Low (for simulation scope)
 
 | Gap | Description |
 |---|---|
@@ -87,7 +111,9 @@ deployment.
 4. Retry wrapper for connectors
 5. ~~Compliance-gap handling in the risk pipeline~~ — **Done**
 6. ~~Receipt store for independent addressability~~ — **Done**
-7. Metrics hooks (counters, histograms)
-8. Storage interface abstractions
-9. HMAC receipt signatures
-10. CI/CD pipeline
+7. ~~GitHub App webhook hardening (HMAC, replay, schema)~~ — **Done**
+8. ~~Idempotent check-run publishing and installation token lifecycle~~ — **Done**
+9. Metrics hooks (counters, histograms)
+10. Storage interface abstractions (persistent replay / receipt stores)
+11. HMAC receipt signatures
+12. CI/CD pipeline

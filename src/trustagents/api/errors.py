@@ -47,3 +47,9 @@ TENANT_MISMATCH = OracleError("TENANT_MISMATCH", "Tenant header does not match r
 ASYNC_JOBS_DISABLED = OracleError("ASYNC_JOBS_DISABLED", "Async jobs feature is disabled", status_code=400)
 JOB_NOT_FOUND = OracleError("JOB_NOT_FOUND", "Job not found", status_code=404)
 CASE_NOT_FOUND = OracleError("CASE_NOT_FOUND", "Case not found", status_code=404)
+
+# GitHub App webhook errors
+GITHUB_APP_DISABLED = OracleError("GITHUB_APP_DISABLED", "GitHub App webhook endpoint is disabled", status_code=404)
+WEBHOOK_SIGNATURE_INVALID = OracleError("WEBHOOK_SIGNATURE_INVALID", "Webhook signature verification failed", status_code=401)
+WEBHOOK_DELIVERY_REPLAYED = OracleError("WEBHOOK_DELIVERY_REPLAYED", "Webhook delivery has already been processed", status_code=409)
+WEBHOOK_PAYLOAD_INVALID = OracleError("WEBHOOK_PAYLOAD_INVALID", "Webhook payload failed schema validation", status_code=422)

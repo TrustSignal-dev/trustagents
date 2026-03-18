@@ -7,6 +7,7 @@ class FeatureFlags(BaseModel):
     http_connectors_enabled: bool = False
     experimental_risk_heuristics_enabled: bool = True
     trustsignal_handoff_export_enabled: bool = False
+    github_app_webhook_enabled: bool = False
 
 
 class Settings(BaseModel):
