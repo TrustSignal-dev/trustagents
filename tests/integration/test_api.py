@@ -29,7 +29,7 @@ def test_evaluate_happy_path():
     )
     assert response.status_code == 200
     body = response.json()
-    assert body["schemaVersion"] == "1.0"
+    assert body["schemaVersion"] == "1.1"
     assert body["oracleStatus"] == "VALID"
 
 

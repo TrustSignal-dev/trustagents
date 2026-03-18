@@ -7,8 +7,14 @@ def evaluate_policies(claims: dict, comparisons: list[ComparisonResult], sources
     outcomes: list[str] = []
     if claims.get("revoked") or any(s.conflicting_fields.get("revoked") for s in sources):
         outcomes.append("revoked")
+    if claims.get("sanctionsMatch") or any(s.matched_fields.get("sanctionsMatch") for s in sources):
+        outcomes.append("sanctions_match")
+    if claims.get("integrityFailure"):
+        outcomes.append("integrity_failure")
     if claims.get("expired"):
         outcomes.append("expired")
+    if claims.get("policyContradiction"):
+        outcomes.append("impossible_policy_contradiction")
     if any(s.retrieval_status in {"UNAVAILABLE", "TIMEOUT", "ERROR"} for s in sources):
         outcomes.append("source_unavailable")
     if any(c.result == "AMBIGUOUS" for c in comparisons):

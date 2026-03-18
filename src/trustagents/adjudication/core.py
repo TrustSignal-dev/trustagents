@@ -5,8 +5,8 @@ from trustagents.oracle.models import Confidence, OracleStatus
 
 def adjudicate(policy_results: list[str], risk_flags: list[str]) -> tuple[OracleStatus, Confidence, float, list[str]]:
     explanations: list[str] = []
-    if "revoked" in policy_results:
-        return OracleStatus.REVOKED, Confidence.LOW, 0.1, ["Revocation evidence overrides matches"]
+    if any(item in policy_results for item in {"revoked", "sanctions_match", "integrity_failure", "impossible_policy_contradiction"}):
+        return OracleStatus.REVOKED, Confidence.LOW, 0.1, ["Hard block policy outcome"]
     if "ambiguous_identity" in policy_results and "high_mismatch" in policy_results:
         return OracleStatus.CONFLICTED, Confidence.LOW, 0.2, ["Conflicting identity evidence across checks"]
     if "source_unavailable" in policy_results:

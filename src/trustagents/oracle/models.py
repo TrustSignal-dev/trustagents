@@ -42,6 +42,30 @@ class Confidence(str, Enum):
     LOW = "LOW"
 
 
+class FraudRiskBand(str, Enum):
+    LOW = "LOW"
+    MEDIUM = "MEDIUM"
+    HIGH = "HIGH"
+
+
+class ReviewRecommendation(str, Enum):
+    NONE = "NONE"
+    RECOMMENDED = "RECOMMENDED"
+    REQUIRED = "REQUIRED"
+
+
+class ScoringMode(str, Enum):
+    DETERMINISTIC_RULES = "DETERMINISTIC_RULES"
+    LEARNED_MODEL_ASSISTED = "LEARNED_MODEL_ASSISTED"
+    HYBRID = "HYBRID"
+
+
+class DecisionAction(str, Enum):
+    PROCEED = "PROCEED"
+    MANUAL_REVIEW = "MANUAL_REVIEW"
+    BLOCK = "BLOCK"
+
+
 class Artifact(CamelModel):
     payload_base64: str | None = None
     payload_text: str | None = None
@@ -89,9 +113,53 @@ class ComparisonResult(CamelModel):
     explanation: str
 
 
+class PipelineVersions(CamelModel):
+    risk_model_version: str = "risk-model-v1"
+    policy_version: str = "policy-v1"
+    signal_set_version: str = "signals-v1"
+    review_policy_version: str = "review-policy-v1"
+
+
+class SimilarCaseReference(CamelModel):
+    case_id: str
+    similarity_score: float
+    outcome: str
+    reviewer_disposition: str
+
+
+class FraudSignal(CamelModel):
+    signal_id: str
+    contribution: float
+    reason: str
+
+
+class FraudRisk(CamelModel):
+    score: float
+    band: FraudRiskBand
+    confidence: Confidence
+    scoring_mode: ScoringMode
+    top_contributing_signals: list[FraudSignal]
+    review_recommendation: ReviewRecommendation
+    similar_reviewed_cases: list[SimilarCaseReference] = Field(default_factory=list)
+
+
+class SignedReceipt(CamelModel):
+    receipt_id: str
+    issued_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    signature: str
+    fingerprint: str
+
+
+class AnchorRecord(CamelModel):
+    anchor_id: str
+    status: str
+    anchored_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+
+
 class OracleDecision(CamelModel):
-    schema_version: str = "1.0"
+    schema_version: str = "1.1"
     oracle_status: OracleStatus
+    decision: DecisionAction
     confidence: Confidence
     confidence_score: float
     checked_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
@@ -100,7 +168,13 @@ class OracleDecision(CamelModel):
     comparison_results: list[ComparisonResult]
     policy_results: list[str]
     risk_flags: list[str]
+    reasons: list[str]
     explanations: list[str]
+    fraud_risk: FraudRisk
+    versions: PipelineVersions
+    signed_receipt: SignedReceipt
+    anchor_record: AnchorRecord
+    manual_review_required: bool = False
     audit_trace: list[str]
 
 
@@ -115,3 +189,26 @@ class JobResponse(CamelModel):
     status: str
     result: OracleDecision | None = None
     error: str | None = None
+
+
+class ReviewedCaseInput(CamelModel):
+    artifact_fingerprint: str
+    feature_digest: str
+    fraud_signals: list[str]
+    outcome: str
+    reviewer_disposition: str
+    false_positive: bool = False
+    false_negative: bool = False
+    versions: PipelineVersions
+
+
+class ReviewedCaseRecord(ReviewedCaseInput):
+    case_id: str
+    recorded_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+
+
+class ReviewerFeedbackInput(CamelModel):
+    case_id: str
+    reviewer_disposition: str
+    false_positive: bool = False
+    false_negative: bool = False
